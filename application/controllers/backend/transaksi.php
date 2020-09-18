@@ -938,6 +938,17 @@ class Transaksi extends CI_Controller {
 
 	}
 
+	function get_detail_faktur(){
+		$id = $this->input->post('id');
+		$query = $this->transaksi_model->get_detail_faktur($id);	
+		if($query){
+			$res = array("status" => "success", "data" => $query);
+		}else{
+			$res = array("status" => "failed", "data" => "data tidak ditemukan");
+		}
+		print(json_encode($res));
+	}
+
 	function get_dpk_trx_pembayaran()
 	{
 		$id = $this->input->post('id');
@@ -997,18 +1008,19 @@ class Transaksi extends CI_Controller {
 		$xendit->_external_id = $post['externalid'];
 		$xendit->_retail_outlet = $post['channel'];
 		$xendit->_name = $post['nasabah'];
-		$xendit->_expected_amount = $post['ammount'];
+		$xendit->_expected_amount = $post['angkePembayaran'];
 		$xendit->_cust_code = $post['kdcust'];
     	$result = $xendit->create_payment_code();
+    	var_dump($result);die;
 
     	if (isset($result['error_code']) && !empty($result['error_code'])) echo json_encode(array('success' => FALSE, 'msg' => $result['message']));
     	else
     	{
-	    	$result['transaksi_id'] = $post['transaksi_id'];
-	    	$result['external_id'] = $post['transaksi_id'];
+	    	$result['nofakt'] = $post['nofaktPembayaran'];
+	    	$result['nofakt'] = $post['nofaktPembayaran'];
 
 	    	$this->insert_request_xendit_trx($result);
-	    	$this->update_id_nasabah($post['transaksi_id'], $post['id_nasabah']);
+	    	// $this->update_id_nasabah($post['transaksi_id'], $post['id_nasabah']);
 			
 	    	echo json_encode(array('success' => TRUE, 'data' => $result));
     	}

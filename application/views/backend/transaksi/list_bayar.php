@@ -1,5 +1,7 @@
 <?php echo $this->load->view('backend/head'); ?>
-
+<style type="text/css">
+    .modal-open .select2-container--open { z-index: 999999 !important; width:100% !important; }
+</style>
 <div id="wrapper">
 	
 	<?php echo $this->load->view('backend/nav-left'); ?>
@@ -57,38 +59,13 @@
                         <div class="col-sm-4">
                             <div class="form-group">
                                 <label class="control-label" for="nofakt">No Faktur</label>
-                                <select class="select2 form-control form-control-lg" name="nofakt" id="selnofakt">
-
-                                    <?php
-                                        // if($noFaktur->num_rows() > 0)
-                                        // {
-                                        //     echo "<option value=''>-</option>";
-                                        //     foreach ($noFaktur->result() as $arrFak) {
-                                        //         echo "<option value='$arrFak->nofakt'";
-                                        //         echo ($params['nofakt'] == $arrFak->nofakt) ? "selected='selected'" : "";
-                                        //         echo ">$arrFak->nofakt</option>";
-                                        //     }
-                                        // }
-                                    ?>
-                                </select>
+                                <select class="select2 form-control form-control-lg" name="nofakt" id="selnofakt"></select>
                             </div>
                         </div>
                         <div class="col-sm-4">
                             <div class="form-group">
                                 <label class="control-label" for="kdcust">Nama Customer</label>
-                                <select class="select2 form-control" name="kdcust" id="selcustomer">
-                                    <?php
-                                        // if($customer->num_rows() > 0)
-                                        // {
-                                        //     echo "<option value=''>-</option>";
-                                        //     foreach ($customer->result() as $arrCustomer) {
-                                        //         echo "<option value='$arrCustomer->kdcust'";
-                                        //         echo ($params['kdcust'] == $arrCustomer->kdcust) ? "selected='selected'" : "";
-                                        //         echo ">$arrCustomer->nama</option>";
-                                        //     }
-                                        // }
-                                    ?>
-                                </select>
+                                <select class="select2 form-control" name="kdcust" id="selcustomer"></select>
                             </div>
                         </div>
                         <div class="col-sm-4">
@@ -157,6 +134,9 @@
                         <div class="ibox-content">
                             <div class="clearfix">
                                 <form action="" id="formExportToExcel" method="POST" target="_blank"></form>
+                                <div class="btn-group">
+                                    <button class="btn btn-primary" id="addPaymentOutlet">Add Payment Outlet</button>
+                                </div>
                                 <div class="btn-group pull-right">
                                     <button class="btn btn-danger" id="exportToExcel">Export To Excel</button>
                                 </div>
@@ -205,6 +185,12 @@
                 				<input type="hidden" name="transaksi_id" id="transaksi_id">
                                 <input type="hidden" name="kdcust_pembayaran" id="kdcust_pembayaran">
                 				<div class="row">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">No Faktur</label>
+                                        <div class="col-sm-8">
+                                            <select class="select2 form-control form-control-lg" name="nofakt" id="nofaktPembayaran"></select>
+                                        </div>
+                                    </div>
                 					<div class="form-group">
                                         <label class="col-sm-4 control-label">Nasabah</label>
                                         <div class="col-sm-8">
@@ -219,27 +205,9 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label class="col-sm-4 control-label">Jumlah Tagihan</label>
-                                        <div class="col-sm-8">
-                                            <input type="text" class="form-control" id="ammount">
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="col-sm-4 control-label">Angsuran Ke</label>
+                                        <label class="col-sm-4 control-label">Angsuran</label>
                                         <div class="col-sm-8">
                                             <input type="text" class="form-control" id="angkePembayaran" readonly>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="col-sm-4 control-label">Channel Payment Code</label>
-                                        <div class="col-sm-8">
-                                            <input type="text" class="form-control" id="externalid" readonly>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="col-sm-4 control-label">No Faktur</label>
-                                        <div class="col-sm-8">
-                                            <input type="text" class="form-control" id="nofaktPembayaran" readonly>
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -248,15 +216,15 @@
                                             <input type="text" class="form-control" id="tenorPembayaran" readonly>
                                         </div>
                                     </div>
-                                    <!-- <div class="form-group">
+                                    <div class="form-group">
                                         <label class="col-sm-4 control-label">Channel</label>
                                         <div class="col-sm-8">
-                                       		<select class="form-control" id="channelPembayaran" readonly>
+                                       		<select class="form-control" id="channelPembayaran">
                                        			<option value="ALFAMART">ALFAMART</option>
                                        			<option value="INDOMARET">INDOMARET</option>
                                        		</select>
                                         </div>
-                                    </div> -->
+                                    </div>
                                     <input type="hidden" id="channelPembayaran">
                 				</div>
 							</form>                        
@@ -298,6 +266,7 @@
         var _collector_id = $("#_collector_id").val();
         var _collectorname = $("#_collectorname").val();
         var isCollector = $("#isCollector").val();
+        var _selnofakform = $("#nofaktPembayaran");
 
         $("#_status_bayar").select2({
           tags: true
@@ -334,6 +303,7 @@
             }
         });
 
+
         // set no faktu selected
         _selnofak.empty().append('<option selected value="'+_nofakt+'">'+_nofakt+'</option>');
         _selnofak.select2('data', {
@@ -345,6 +315,54 @@
         /*
         END
         */
+
+        //start form pembayaran
+        _selnofakform.select2({
+            dropdownParent: $('#fInputPembayaran'),
+            placeholder: 'Pilih No Faktur',
+            width: "100%",
+            allowClear: true,
+            delay: 250,
+            minimumInputLength: 3,
+            ajax: {
+                url: "<?php echo site_url('backend/transaksi/get_nofak'); ?>/" + collector_id,
+                dataType: 'json',
+                processResults: function (data) {
+                    return {
+                        results: data
+                    };
+                },
+                cache: true
+            }
+        });
+
+        _selnofakform.on('select2:select', function (e) {
+            var data = e.params.data;
+            $.ajax({
+                url: "<?php echo site_url('backend/transaksi/get_detail_faktur'); ?>",
+                type: 'POST',
+                data: {
+                    id: data.id
+                },
+                dataType: 'json',
+                success: function(result) {
+                    console.log(result);
+                    if(result.status=="success"){
+                        data = result.data;
+                        $('#transaksi_id').val(data.id);
+                        $('#nasabah').val(data.namakons);
+                        $('#angkePembayaran').val(data.angsuran);
+                        $('#tenorPembayaran').val(data.tenor);
+                        $('#idnasabah').val('');
+                        $('#idnasabah').attr('readonly', false);
+
+                    }else{
+                        alert('No Faktur tidak valid');
+                    }
+                }
+            });
+        });
+        //end form pembayaran
 
         /*
         START CUSTOMER SELECT2
@@ -456,6 +474,23 @@
                 }
               },
             buttons: [ ]
+        });
+
+        $('#addPaymentOutlet').click(function(e) {
+            e.preventDefault();
+            $('#transaksi_id').val('');
+            $('#kdcust_pembayaran').val('');
+            $('#nasabah').val('');
+            $('#ammount').val('');
+            $('#angkePembayaran').val('');
+            $('#externalid').val('');
+            $('#nofaktPembayaran').val('');
+            $('#tenorPembayaran').val('');
+            $('#fInputPembayaran').modal('show');
+            $('#channelPembayaran').val('INDOMARET');
+            $('#idnasabah').val('');
+            $('#idnasabah').attr('readonly', true);
+            $('#fInputPembayaran').modal('show');
         });
 
         $('#exportToExcel').click(function(e) {

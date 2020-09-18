@@ -351,24 +351,27 @@ class Transaksi_model extends CI_Model {
 	
 	}
 
+
+
 	function insert_request_xendit_trx($params)
 	{
-		$tmp_cleartimestamp = explode('.', $params['expiration_date']);
-		$cleartimestamp = str_replace('T', ' ', $tmp_cleartimestamp[0]);
+		// $tmp_cleartimestamp = explode('.', $params['expiration_date']);
+		// $cleartimestamp = str_replace('T', ' ', $tmp_cleartimestamp[0]);
 
-		$this->db->set('transaksi_id', $params['transaksi_id']);
-		$this->db->set('is_single_use', $params['is_single_use']);
-		$this->db->set('status', $params['status']);
-		$this->db->set('owner_id', $params['owner_id']);
-		$this->db->set('external_id', $params['external_id']);
-		$this->db->set('retail_outlet_name', $params['retail_outlet_name']);
-		$this->db->set('prefix', $params['prefix']);
+		$this->db->set('nofakt', $params['nofakt']);
+		// $this->db->set('transaksi_id', $params['transaksi_id']);
+		// $this->db->set('is_single_use', $params['is_single_use']);
+		// $this->db->set('status', $params['status']);
+		// $this->db->set('owner_id', $params['owner_id']);
+		// $this->db->set('external_id', $params['external_id']);
+		// $this->db->set('retail_outlet_name', $params['retail_outlet_name']);
+		// $this->db->set('prefix', $params['prefix']);
 		$this->db->set('name', $params['name']);
-		$this->db->set('payment_code', $params['payment_code']);
-		$this->db->set('type', $params['type']);
-		$this->db->set('expected_amount', $params['expected_amount']);
-		$this->db->set('expiration_date', $cleartimestamp);
-		$this->db->set('fixed_payment_code_id', $params['id']);
+		// $this->db->set('payment_code', $params['payment_code']);
+		// $this->db->set('type', $params['type']);
+		// $this->db->set('expected_amount', $params['expected_amount']);
+		// $this->db->set('expiration_date', $cleartimestamp);
+		// $this->db->set('fixed_payment_code_id', $params['id']);
 		$this->db->set('created_datetime', 'NOW()', FALSE);
 
 		return $this->db->insert('xendit_request');
@@ -522,6 +525,17 @@ class Transaksi_model extends CI_Model {
 		// 	return false;
 		// }
 	
+	}
+
+	function get_detail_faktur($id){
+		$sql="select 
+					nofakt, 
+					kdcust,
+					namakons,
+					angsuran,
+					tenor
+				from transaksi where nofakt='".$id."' and angke=1";
+		return $this->db->query($sql)->row_array();
 	}
 }
 ?>
