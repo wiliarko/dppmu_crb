@@ -86,6 +86,9 @@
                     <li class="<?php echo ($pageInfo['page'] == 'Transaksi' && $pageInfo['subpage'] == 'PEMBAYARAN' ? 'active':'');?>">
                         <a href="<?php echo base_url() ."backend/transaksi/pembayaran" ?>">PEMBAYARAN</a>
                     </li>
+                    <li class="<?php echo ($pageInfo['page'] == 'Transaksi' && $pageInfo['subpage'] == 'LAPORAN PEMBAYARAN' ? 'active':'');?>">
+                        <a href="<?php echo base_url() ."backend/transaksi/laporanpembayaran" ?>">LAPORAN PEMBAYARAN</a>
+                    </li>
                     <?php endif; ?>
                 </ul>
             </li>

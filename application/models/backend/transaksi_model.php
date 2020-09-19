@@ -375,6 +375,65 @@ class Transaksi_model extends CI_Model {
 	
 	}
 
+	function get_laporan_pembayaran($params, $api=null, $orderlist=true){
+		$isWhere="";
+		
+		if(@$params['export'] !='' OR $params['nofakt'] !='' OR $params['kdcust'] !=''OR (@$params['outlet'] != '')){
+			
+			if($params['nofakt'] != '' && $params['nofakt'] != '-'){
+				$isWhere .= ' AND t.nofakt = "'. $params['nofakt'] .'"';
+			}
+			if($params['kdcust'] != '' && $params['kdcust'] != '-'){
+				$isWhere .= ' AND t.kdcust = "'. $params['kdcust'] .'"';
+			}
+			if($params['outlet'] != '' && $params['outlet'] != '-'){
+				$isWhere .= ' AND xn.retail_outlet_name = "'. $params['outlet'] .'"';
+			}
+			if($params['start_pay_date'] != '' && $params['end_pay_date'] != ''){
+				$isWhere .= ' AND (date(xn.transaction_timestamp) >= "'.$params['start_pay_date'].'" AND date(xn.transaction_timestamp) <= "'.$params['end_pay_date'].'") AND t.kode_bayar IN ("99", "00") ';
+			}
+
+			if( !empty($params['request']['search']['value']) ) {   
+				$isWhere .=" AND (";
+				$isWhere .=" t.nofakt LIKE '".$params['request']['search']['value']."%'";
+				$isWhere .=" OR t.namakons LIKE '".$params['request']['search']['value']."%'";
+				$isWhere .=" OR xn.retail_outlet_name LIKE '".$params['request']['search']['value']."%'";
+				$isWhere .=" OR xn.payment_code LIKE '".$params['request']['search']['value']."%' )";
+			}
+			
+			if(empty($api)){
+				$sql = "
+					select 
+						t.id,
+						t.nofakt, 
+						t.namakons,
+						xn.transaction_timestamp,
+						t.tenor,
+						t.angsuran,
+						t.angke,
+						xn.retail_outlet_name
+					from xendit_notify xn
+					left join transaksi t on xn.transaksi_id=t.id
+				 	where 1=1 ".$isWhere;
+
+				if($orderlist==true){
+					$ordename = ($params['columns'][$params['request']['order'][0]['column']]!=='id') ? $params['columns'][$params['request']['order'][0]['column']] : "xn.transaction_timestamp"; 
+					$sql.=  " ORDER BY ". $ordename ."   ".$params['request']['order'][0]['dir']."  LIMIT ".$params['request']['start']." ,".$params['request']['length']." ";
+				}else{
+					$sql.= " ORDER BY xn.transaction_timestamp ASC";
+				}
+			}
+			
+			$sql .= '';
+			// echo $sql;die;
+			$result = $this->db->query($sql);
+			return $result;
+
+		}else{
+			return false;
+		}
+	}
+
 
 
 	function insert_request_xendit_trx($params)
@@ -431,6 +490,7 @@ class Transaksi_model extends CI_Model {
 
 			$this->db->set('notify_code_id', $params['id']);
 			$this->db->set('external_id', $params['external_id']);
+			$this->db->set('transaksi_id', $row->id);
 			$this->db->set('created_datetime', 'NOW()', FALSE);
 			$this->db->set('prefix', $params['prefix']);
 			$this->db->set('payment_code', $params['payment_code']);

@@ -865,6 +865,68 @@ class Transaksi extends CI_Controller {
 
 	}
 
+	public function laporanpembayaran() {
+
+
+		$this->authentication->restrict();
+		
+		$data['pageInfo'] = array(
+			'page' => $this->page,
+			'subpage' => 'LAPORAN PEMBAYARAN',
+			'url_module' => $this->url_modul .'laporanpembayaran',
+		);
+		
+		$isNotAdmin = ($this->session->userdata['logged']['groupid'] !== "1") ? $this->session->userdata['logged']['id'] : "";
+
+		$params = array(
+			'nofakt' 		=> !empty($this->input->get("nofakt")) ? urldecode($this->input->get("nofakt")) : "",
+			'kdcust' 		=> !empty($this->input->get("kdcust")) ? urldecode($this->input->get("kdcust")) : "",
+			'collector' 	=> !empty($this->input->get("collector")) ? urldecode($this->input->get("collector")) : $isNotAdmin,
+			'start_pay_date'	=> !empty($this->input->get("start_pay_date")) ? urldecode($this->input->get("start_pay_date")) : "",
+			'end_pay_date'		=> !empty($this->input->get("end_pay_date")) ? urldecode($this->input->get("end_pay_date")) : "",
+			'status_bayar'	=> !empty($this->input->get("status_bayar")) ? urldecode($this->input->get("status_bayar")) : "",
+			'outlet'		=> !empty($this->input->get("outlet")) ? urldecode($this->input->get("outlet")) : "",
+		);
+
+		$data['params'] = array(
+							'start_pay_date' => $params['start_pay_date'],
+							'end_pay_date' => $params['end_pay_date'],
+							'nofakt' => $params['nofakt'],
+							'kdcust' => $params['kdcust'],
+							'collector' => $params['collector'],
+							'status_bayar' => $params['status_bayar'],
+							'outlet' => $params['outlet'],
+						);
+
+		$data['kdcustname'] = $this->transaksi_model->get_customer(null, null, $params['kdcust'])->row()->nama;
+		$data['collectorname'] = $this->transaksi_model->get_collector($params['collector'], true)->row()->nama;
+		$data['collector_id'] = !empty($params['collector']) ? $params['collector'] : "";
+
+		$data['tablelist'] = array(
+			'head' => array(
+				//Caption, sort, width
+				array('No.','nosort', '3%'),
+				array('NOFAKT', '',''),
+				array('NAMAKONS', '','1'),
+				array('DATE', '',''),
+				array('TENOR', '',''),
+				array('ANGSURAN', '',''),
+				array('ANGKE', '',''),
+				array('OUTLET', '','')
+			)
+		);
+
+		$data['via'] = "laporanpembayaran";
+		$data['page_header'] = array(
+								"DPP-MU",
+								"Transaksi",
+								"LAPORAN PEMBAYARAN"
+							  );
+
+		$this->load->view('backend/transaksi/laporan_bayar', $data);
+
+	}
+
 	function gettablelist_pembayaran()
 	{
 		$isNotAdmin = ($this->session->userdata['logged']['groupid'] !== "1") ? $this->session->userdata['logged']['id'] : "";
@@ -911,6 +973,79 @@ class Transaksi extends CI_Controller {
 							$row['expected_amount'],
 							$row['retail_outlet_name'],
 							$row['payment_code']
+			  			);
+				}
+
+				$no++;
+			}
+
+		}else{
+
+			$data = array();
+
+		}
+
+		$json_data = array(
+			"draw"            => intval( $_REQUEST['draw'] ),   
+			"recordsTotal"    => intval( $totalRecords ),  
+			"recordsFiltered" => intval($totalRecords),
+			"data"            => $data
+		);
+
+		echo json_encode($json_data);
+
+	}
+
+	function gettablelist_laporan_pembayaran()
+	{
+		$isNotAdmin = ($this->session->userdata['logged']['groupid'] !== "1") ? $this->session->userdata['logged']['id'] : "";
+
+		$columns = array( 
+			0 =>'id',
+			1 =>'nofakt', 
+			2 => 'namakons',
+			3 => 'transaction_timestamp',
+			4 => 'tenor',
+			5 => 'angsuran',
+			6 => 'angke',
+			7 => 'retail_outlet_name'
+		);
+
+		$params = array(
+			'nofakt' 		=> !empty($this->input->get("nofakt")) ? urldecode($this->input->get("nofakt")) : "",
+			'kdcust' 		=> !empty($this->input->get("kdcust")) ? urldecode($this->input->get("kdcust")) : "",
+			'outlet'		=> !empty($this->input->get("outlet")) ? urldecode($this->input->get("outlet")) : "",
+			'start_pay_date'	=> !empty($this->input->get("start_pay_date")) ? urldecode($this->input->get("start_pay_date")) : "",
+			'end_pay_date'		=> !empty($this->input->get("end_pay_date")) ? urldecode($this->input->get("end_pay_date")) : "",
+			'request' 		=> $_REQUEST,
+			'columns'		=> $columns
+		);
+
+		$selrec	= $this->transaksi_model->get_laporan_pembayaran($params, false, true);
+
+		$sqlTot	= $this->transaksi_model->get_laporan_pembayaran($params, false, false);
+		$totalRecords = ($sqlTot!=false) ? $sqlTot->num_rows() : 0;
+		$data = array();
+		$page = ($_REQUEST['length'] + $_REQUEST['start']) / $_REQUEST['length'];
+		$start = ($_REQUEST['start'] >= $_REQUEST['length']) ? $_REQUEST['start']-1 : $_REQUEST['start'];
+		$no = $start + $page;
+		$btn_disable = 0;
+		// var_dump($selrec->result_array());die;
+		if($totalRecords > 0)
+		{
+
+			foreach($selrec->result_array() as $row)
+			{	
+				if($this->input->get('via') == 'laporanpembayaran'){
+					$data[] = array(
+			  				'<center>'.$no.'<center>',
+			  				$row['nofakt'], 
+							$row['namakons'],
+							$row['transaction_timestamp'],
+							$row['tenor'],
+							$row['angsuran'],
+							$row['angke'],
+							$row['retail_outlet_name']
 			  			);
 				}
 
