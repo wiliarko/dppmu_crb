@@ -333,12 +333,36 @@ class Transaksi_model extends CI_Model {
 	function get_ref_faktur($params, $api=null, $orderlist=true) {
 	
 		$isWhere="";
-		// OR @$params['request'] !=''
-		if(@$params['export'] !='' OR $params['nofakt'] !='' OR $params['kdcust'] !='' OR $params['collector'] !='' OR @$params['status_bayar'] !='' OR (@$params['start_date'] != '' && @$params['end_date'] != '') OR (@$params['start_pay_date'] != '' && @$params['end_pay_date'] != '')){
 		
+		if(@$params['export'] !='' OR $params['nofakt'] !='' OR $params['kdcust'] !=''OR (@$params['outlet'] != '')){
+			
+			if($params['nofakt'] != '' && $params['nofakt'] != '-'){
+				$isWhere .= ' AND nofakt = "'. $params['nofakt'] .'"';
+			}
+			if($params['kdcust'] != '' && $params['kdcust'] != '-'){
+				$isWhere .= ' AND kdcust = "'. $params['kdcust'] .'"';
+			}
+			if($params['outlet'] != '' && $params['outlet'] != '-'){
+				$isWhere .= ' AND retail_outlet_name = "'. $params['outlet'] .'"';
+			}
+
+			if( !empty($params['request']['search']['value']) ) {   
+				$isWhere .=" AND (";
+				$isWhere .=" nofakt LIKE '".$params['request']['search']['value']."%'";
+				$isWhere .=" OR name LIKE '".$params['request']['search']['value']."%'";
+				$isWhere .=" OR retail_outlet_name LIKE '".$params['request']['search']['value']."%'";
+				$isWhere .=" OR payment_code LIKE '".$params['request']['search']['value']."%' )";
+			}
 			
 			if(empty($api)){
-				$sql = "select * from ref_faktur_payment";
+				$sql = "select * from xendit_request where 1=1 ".$isWhere;
+
+				if($orderlist==true){
+					$ordename = ($params['columns'][$params['request']['order'][0]['column']]!=='id') ? $params['columns'][$params['request']['order'][0]['column']] : "nofakt"; 
+					$sql.=  " ORDER BY ". $ordename ."   ".$params['request']['order'][0]['dir']."  LIMIT ".$params['request']['start']." ,".$params['request']['length']." ";
+				}else{
+					$sql.= " ORDER BY nofakt ASC";
+				}
 			}
 			
 			$sql .= '';
@@ -355,23 +379,25 @@ class Transaksi_model extends CI_Model {
 
 	function insert_request_xendit_trx($params)
 	{
-		// $tmp_cleartimestamp = explode('.', $params['expiration_date']);
-		// $cleartimestamp = str_replace('T', ' ', $tmp_cleartimestamp[0]);
+		$tmp_cleartimestamp = explode('.', $params['expiration_date']);
+		$cleartimestamp = str_replace('T', ' ', $tmp_cleartimestamp[0]);
 
-		$this->db->set('nofakt', $params['nofakt']);
-		// $this->db->set('transaksi_id', $params['transaksi_id']);
-		// $this->db->set('is_single_use', $params['is_single_use']);
-		// $this->db->set('status', $params['status']);
-		// $this->db->set('owner_id', $params['owner_id']);
-		// $this->db->set('external_id', $params['external_id']);
-		// $this->db->set('retail_outlet_name', $params['retail_outlet_name']);
-		// $this->db->set('prefix', $params['prefix']);
+		$this->db->set('transaksi_id', $params['transaksi_id']);
+		$this->db->set('is_single_use', $params['is_single_use']);
+		$this->db->set('status', $params['status']);
+		$this->db->set('owner_id', $params['owner_id']);
+		$this->db->set('external_id', $params['external_id']);
+		$this->db->set('retail_outlet_name', $params['retail_outlet_name']);
+		$this->db->set('prefix', $params['prefix']);
 		$this->db->set('name', $params['name']);
-		// $this->db->set('payment_code', $params['payment_code']);
-		// $this->db->set('type', $params['type']);
-		// $this->db->set('expected_amount', $params['expected_amount']);
-		// $this->db->set('expiration_date', $cleartimestamp);
-		// $this->db->set('fixed_payment_code_id', $params['id']);
+		$this->db->set('payment_code', $params['payment_code']);
+		$this->db->set('type', $params['type']);
+		$this->db->set('expected_amount', $params['expected_amount']);
+		$this->db->set('expiration_date', $cleartimestamp);
+		$this->db->set('fixed_payment_code_id', $params['id']);
+		$this->db->set('nofakt', $params['nofakt']);
+		$this->db->set('tenor_pembayaran', $params['tenorPembayaran']);
+		$this->db->set('kdcust', $params['kdcust']);
 		$this->db->set('created_datetime', 'NOW()', FALSE);
 
 		return $this->db->insert('xendit_request');
@@ -529,6 +555,7 @@ class Transaksi_model extends CI_Model {
 
 	function get_detail_faktur($id){
 		$sql="select 
+					id,
 					nofakt, 
 					kdcust,
 					namakons,

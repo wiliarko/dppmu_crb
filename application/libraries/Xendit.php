@@ -30,7 +30,7 @@ class Xendit {
 			),
 			'method' => 'POST',
 			// 'url' => 'http://sewa-beli.net/api_xendit/send_payment/'
-			'url' => 'http://192.168.43.180/dppmu_crb/api.php/send_payment'
+			'url' => 'http://testerxendid.sewa-beli.net/api_xendit/send_payment'
 		);
 
 		return $this->_do_curl($params);

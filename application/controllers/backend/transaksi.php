@@ -846,9 +846,8 @@ class Transaksi extends CI_Controller {
 				//Caption, sort, width
 				array('No.','nosort', '3%'),
 				array('NOFAKT', '',''),
-				// array('COLLECTOR', '',''),
 				array('NAMAKONS', '','1'),
-				// array('DUE DATE', '',''),
+				array('TENOR', '',''),
 				array('ANGSURAN', '',''),
 				array('OUTLET', '',''),
 				array('PAYMENT CODE', '','')
@@ -871,29 +870,25 @@ class Transaksi extends CI_Controller {
 		$isNotAdmin = ($this->session->userdata['logged']['groupid'] !== "1") ? $this->session->userdata['logged']['id'] : "";
 
 		$columns = array( 
-			0 =>'rfp_id',
-			1 =>'rfp_faktur', 
-			2 => 'rfp_nama',
-			3 => 'rfp_angsuran',
-			4 => 'rfp_outlet',
-			5 => 'rfp_payment_code'
+			0 =>'id',
+			1 =>'nofakt', 
+			2 => 'name',
+			3 => 'tenor_pembayaran',
+			4 => 'expected_amount',
+			5 => 'retail_outlet_name',
+			6 => 'payment_code'
 		);
 
 		$params = array(
 			'nofakt' 		=> !empty($this->input->get("nofakt")) ? urldecode($this->input->get("nofakt")) : "",
 			'kdcust' 		=> !empty($this->input->get("kdcust")) ? urldecode($this->input->get("kdcust")) : "",
-			'collector' 	=> !empty($this->input->get("collector")) ? urldecode($this->input->get("collector")) : $isNotAdmin,
-			'start_date'	=> !empty($this->input->get("start_date")) ? urldecode($this->input->get("start_date")) : "",
-			'end_date'		=> !empty($this->input->get("end_date")) ? urldecode($this->input->get("end_date")) : "",
-			'start_pay_date'=> !empty($this->input->get("start_pay_date")) ? urldecode($this->input->get("start_pay_date")) : "",
-			'end_pay_date'	=> !empty($this->input->get("end_pay_date")) ? urldecode($this->input->get("end_pay_date")) : "",
-			'status_bayar'	=> !empty($this->input->get("status_bayar")) ? urldecode($this->input->get("status_bayar")) : "",
 			'outlet'		=> !empty($this->input->get("outlet")) ? urldecode($this->input->get("outlet")) : "",
 			'request' 		=> $_REQUEST,
 			'columns'		=> $columns
 		);
 
 		$selrec	= $this->transaksi_model->get_ref_faktur($params, false, true);
+
 		$sqlTot	= $this->transaksi_model->get_ref_faktur($params, false, false);
 		$totalRecords = ($sqlTot!=false) ? $sqlTot->num_rows() : 0;
 		$data = array();
@@ -910,11 +905,12 @@ class Transaksi extends CI_Controller {
 				if($this->input->get('via') == 'pembayaran'){
 					$data[] = array(
 			  				'<center>'.$no.'<center>',
-			  				$row['rfp_faktur'],
-			  				$row['rfp_nama'],
-			  				$row['rfp_angsuran'],
-			  				$row['rfp_outlet'],
-			  				$row['rfp_payment_code']
+			  				$row['nofakt'], 
+							$row['name'],
+							$row['tenor_pembayaran'],
+							$row['expected_amount'],
+							$row['retail_outlet_name'],
+							$row['payment_code']
 			  			);
 				}
 
@@ -1011,13 +1007,16 @@ class Transaksi extends CI_Controller {
 		$xendit->_expected_amount = $post['angkePembayaran'];
 		$xendit->_cust_code = $post['kdcust'];
     	$result = $xendit->create_payment_code();
-    	var_dump($result);die;
+    	// var_dump($result);die;
 
     	if (isset($result['error_code']) && !empty($result['error_code'])) echo json_encode(array('success' => FALSE, 'msg' => $result['message']));
     	else
     	{
+	    	$result['transaksi_id'] = $post['transaksi_id'];
+	    	$result['external_id'] = $post['transaksi_id'];
 	    	$result['nofakt'] = $post['nofaktPembayaran'];
-	    	$result['nofakt'] = $post['nofaktPembayaran'];
+	    	$result['tenorPembayaran'] = $post['tenorPembayaran'];
+	    	$result['kdcust'] = $post['kdcust'];
 
 	    	$this->insert_request_xendit_trx($result);
 	    	// $this->update_id_nasabah($post['transaksi_id'], $post['id_nasabah']);
@@ -1127,6 +1126,25 @@ class Transaksi extends CI_Controller {
    		}
     }
 
+    public function validate_export_to_excel_pembayaran()
+    {
+    	$post = $this->input->post(NULL, TRUE);
+
+   		$post['request'] = array();
+		$post['columns'] = array();
+
+   		$get_pembayaran_report	= $this->transaksi_model->get_ref_faktur($post, false, false);
+
+   		if ($get_pembayaran_report->num_rows() > 500)
+   		{
+   			echo json_encode(array('success' => FALSE));
+   		}
+   		else
+   		{
+   			echo json_encode(array('success' => TRUE));
+   		}
+    }
+
    	function export_to_excel_pembayaran()
    	{
    		$post = $this->input->post(NULL, TRUE);
@@ -1134,7 +1152,7 @@ class Transaksi extends CI_Controller {
    		$post['request'] = array();
 		$post['columns'] = array();
 
-   		$get_pembayaran_report	= $this->transaksi_model->get_pembayaran_report($post, false, false);
+   		$get_pembayaran_report	= $this->transaksi_model->get_ref_faktur($post, false, false);
 
    		if ($get_pembayaran_report->num_rows() > 0) 
    		{

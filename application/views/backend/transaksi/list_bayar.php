@@ -69,37 +69,6 @@
                             </div>
                         </div>
                         <div class="col-sm-4">
-                            <?php $isCollector = in_array($this->session->userdata['logged']['groupid'], array(1,3,4,6)) ? "" : "disabled"; ?>
-                            <div class="form-group">
-                                <input type="hidden" id="isCollector" value="<?= $isCollector ?>">
-                                <label class="control-label" for="collector">Nama Collector</label>
-                                <select class="select2 form-control" name="collector" id="selcollector">
-                                </select>
-                            </div>	
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-4">
-                            <label class="control-label" for="collector">Periode</label>
-                            <div class="input-daterange input-group" id="datepicker">
-                                <input type="text" class="input-sm form-control" name="start_date" id="_start_date" value="<?php echo (@$date_added) ? $date_added : ""; ?>"/>
-                                <span class="input-group-addon">to</span>
-                                <input type="text" class="input-sm form-control" name="end_date" id="_end_date"  value="<?php echo (@$date_modified) ? $date_modified : ""; ?>" />
-                            </div>
-                        </div>
-						<?php if($via == 'pembayaran') : ?>
-						
-						<div class="col-sm-2">
-						    <label class="control-label">Status Bayar</label>
-                            <select class="select2 form-control" name="status_bayar" id="_status_bayar">
-                                <option value='-'>-</option>
-                                <option value='bayar' <?= ($params['status_bayar'] == 'bayar') ? "selected='selected'" : ""; ?>>Bayar</option>
-                                <option value='belum_bayar' <?= ($params['status_bayar'] == 'belum_bayar') ? "selected='selected'" : ""; ?>>Belum Bayar</option>
-                                <option value='janji_bayar' <?= ($params['status_bayar'] == 'janji_bayar') ? "selected='selected'" : ""; ?>>Janji Bayar</option>
-                            </select>
-                        </div>
-
-                        <div class="col-sm-2">
                             <label class="control-label">Outlet</label>
                             <select class="select2 form-control" name="outlet" id="_outlet">
                                 <option value='-'>-</option>
@@ -107,18 +76,8 @@
                                 <option value='INDOMARET' <?= ($params['outlet'] == 'INDOMARET') ? "selected='selected'" : ""; ?>>INDOMARET</option>
                             </select>
                         </div>
-
-						<?php endif; ?>
-
-                        <div class="col-sm-4">
-                            <label class="control-label" for="collector">Tanggal Bayar</label>
-                            <div class="input-daterange input-group" id="datepicker">
-                                <input type="text" class="input-sm form-control" name="start_pay_date" id="_start_pay_date" value="<?php echo (@$start_pay_date) ? $start_pay_date : ""; ?>"/>
-                                <span class="input-group-addon">to</span>
-                                <input type="text" class="input-sm form-control" name="end_pay_date" id="_end_pay_date" value="<?php echo (@$end_pay_date) ? $end_pay_date : ""; ?>" />
-                            </div>
-                        </div>
-
+                    </div>
+                    <div class="row">
                         <div class="col-sm-4">
                             <div class="form-group">
                                 <input type="submit" class="btn btn-primary" value=" Search " style="margin-top: 20px" />
@@ -350,6 +309,7 @@
                     if(result.status=="success"){
                         data = result.data;
                         $('#transaksi_id').val(data.id);
+                        $('#kdcust_pembayaran').val(data.kdcust);
                         $('#nasabah').val(data.namakons);
                         $('#angkePembayaran').val(data.angsuran);
                         $('#tenorPembayaran').val(data.tenor);
@@ -421,21 +381,6 @@
             }
         });
 
-        // set collector
-        _selcollector.empty().append('<option selected value="'+_collector_id+'">'+_collectorname+'</option>');
-        _selcollector.select2('data', {
-          id: _collector_id,
-          text: _collectorname
-        });
-        _selcollector.trigger('change');
-
-        if(isCollector=='disabled'){
-            _selcollector.prop('disabled', !$('#one').prop('disabled'));
-        }
-        /*
-        END
-        */
-
         $('.input-daterange').datepicker({
             format: 'yyyy-mm-dd',
             keyboardNavigation: false,
@@ -500,28 +445,20 @@
                 ColsIdx: [
                     'number',
                     'nofakt',
-                    'id_nasabah',
-                    'namakons',
-                    'collector',
-                    'due_date',
-                    'angsuran',
-                    'angke',
-                    'retail_outlet_name',
-                    'tanggal_bayar',
-                    'keterangan'
+                    'payment_code',
+                    'name',
+                    'tenor_pembayaran',
+                    'expected_amount',
+                    'retail_outlet_name'
                 ],
                 ColsName: [
                     'NO',
                     'NO FAKTUR',
-                    'ID NASABAH',
+                    'PAYMENT CODE',
                     'NAMA NASABAH',
-                    'COLLECTOR',
-                    'DUE DATE',
+                    'TENOR', 
                     'ANGSURAN', 
-                    'ANGKE',
-                    'OTLET',
-                    'TGL BAYAR',
-                    'KETERANGAN'
+                    'OTLET'
                 ]
             });
 
@@ -538,36 +475,6 @@
             $('<input />').attr('type', 'hidden')
                 .attr('name', 'kdcust')
                 .attr('value', _selcustomer.val())
-                .appendTo('#formExportToExcel');
-
-            $('<input />').attr('type', 'hidden')
-                .attr('name', 'collector')
-                .attr('value', _selcollector.val())
-                .appendTo('#formExportToExcel');
-
-            $('<input />').attr('type', 'hidden')
-                .attr('name', 'start_date')
-                .attr('value', _start_date.val())
-                .appendTo('#formExportToExcel');
-
-            $('<input />').attr('type', 'hidden')
-                .attr('name', 'end_date')
-                .attr('value', _end_date.val())
-                .appendTo('#formExportToExcel');
-
-            $('<input />').attr('type', 'hidden')
-                .attr('name', 'start_pay_date')
-                .attr('value', _start_pay_date.val())
-                .appendTo('#formExportToExcel');
-
-            $('<input />').attr('type', 'hidden')
-                .attr('name', 'end_pay_date')
-                .attr('value', _end_pay_date.val())
-                .appendTo('#formExportToExcel');
-
-            $('<input />').attr('type', 'hidden')
-                .attr('name', 'status_bayar')
-                .attr('value', _status_bayar.val())
                 .appendTo('#formExportToExcel');
 
             $('<input />').attr('type', 'hidden')
@@ -590,7 +497,7 @@
             });
 
             $.ajax({
-                url: "<?php echo site_url('backend/transaksi/validate_export_to_excel'); ?>",
+                url: "<?php echo site_url('backend/transaksi/validate_export_to_excel_pembayaran'); ?>",
                 type: 'POST',
                 data: newData,
                 dataType: 'json',
