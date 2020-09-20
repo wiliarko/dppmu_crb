@@ -1309,6 +1309,58 @@ class Transaksi extends CI_Controller {
 	        $qry = $this->xls_writer->get_grid();
 	        $this->xls_writer->store_data($new_data);
 	        $this->xls_writer->add_sheet('Sheet1');
+	        $this->xls_writer->save('Payment_gateway_' . date('Y-m-d_H-i-s') . '.xls');
+   		}
+   	}
+
+   	public function validate_export_to_excel_laporan_pembayaran()
+    {
+    	$post = $this->input->post(NULL, TRUE);
+
+   		$post['request'] = array();
+		$post['columns'] = array();
+
+   		$get_pembayaran_report	= $this->transaksi_model->get_laporan_pembayaran($post, false, false);
+
+   		if ($get_pembayaran_report->num_rows() > 500)
+   		{
+   			echo json_encode(array('success' => FALSE));
+   		}
+   		else
+   		{
+   			echo json_encode(array('success' => TRUE));
+   		}
+    }
+
+   	function export_to_excel_laporan_pembayaran()
+   	{
+   		$post = $this->input->post(NULL, TRUE);
+
+   		$post['request'] = array();
+		$post['columns'] = array();
+
+   		$get_pembayaran_report	= $this->transaksi_model->get_laporan_pembayaran($post, false, false);
+
+   		if ($get_pembayaran_report->num_rows() > 0) 
+   		{
+   			$result = $get_pembayaran_report->result();
+
+   			$number = 1;
+
+   			$new_data = array();
+
+   			foreach ($result as $k => $v) 
+   			{
+   				$v->number = $number++;
+   				$new_data[$k] = (array)$v;
+   			}
+
+   			$this->load->library('xls_writer');
+
+   			$this->xls_writer->config($post);
+	        $qry = $this->xls_writer->get_grid();
+	        $this->xls_writer->store_data($new_data);
+	        $this->xls_writer->add_sheet('Sheet1');
 	        $this->xls_writer->save('Laporan_pembayaran_' . date('Y-m-d_H-i-s') . '.xls');
    		}
    	}

@@ -84,7 +84,7 @@
 
                     <?php if(in_array($groupid, array(1,2,4,6))):?>
                     <li class="<?php echo ($pageInfo['page'] == 'Transaksi' && $pageInfo['subpage'] == 'PEMBAYARAN' ? 'active':'');?>">
-                        <a href="<?php echo base_url() ."backend/transaksi/pembayaran" ?>">PEMBAYARAN</a>
+                        <a href="<?php echo base_url() ."backend/transaksi/pembayaran" ?>">PAYMENT GATEWAY</a>
                     </li>
                     <li class="<?php echo ($pageInfo['page'] == 'Transaksi' && $pageInfo['subpage'] == 'LAPORAN PEMBAYARAN' ? 'active':'');?>">
                         <a href="<?php echo base_url() ."backend/transaksi/laporanpembayaran" ?>">LAPORAN PEMBAYARAN</a>

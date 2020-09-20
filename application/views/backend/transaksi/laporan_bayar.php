@@ -397,6 +397,7 @@
             responsive: false,
             dom: '<"html5buttons"B>lTfgitp',
             serverSide: true,
+            order: [[ 3, "desc" ]],
             ajax:{
                 url : "<?= base_url() ?>backend/transaksi/gettablelist_laporan_pembayaran",
                 type: "get",
@@ -449,21 +450,23 @@
             var cols = JSON.stringify({
                 ColsIdx: [
                     'number',
-                    'nofakt',
-                    'payment_code',
-                    'name',
-                    'tenor_pembayaran',
-                    'expected_amount',
+                    'nofakt', 
+                    'namakons',
+                    'transaction_timestamp',
+                    'tenor',
+                    'angsuran',
+                    'angke',
                     'retail_outlet_name'
                 ],
                 ColsName: [
                     'NO',
-                    'NO FAKTUR',
-                    'PAYMENT CODE',
-                    'NAMA NASABAH',
-                    'TENOR', 
-                    'ANGSURAN', 
-                    'OTLET'
+                    'NOFAKT',
+                    'NAMAKONS',
+                    'DATE',
+                    'TENOR',
+                    'ANGSURAN',
+                    'ANGKE',
+                    'OUTLET'
                 ]
             });
 
@@ -486,6 +489,16 @@
                 .attr('name', 'outlet')
                 .attr('value', _outlet.val())
                 .appendTo('#formExportToExcel');
+
+            $('<input />').attr('type', 'hidden')
+                .attr('name', 'start_pay_date')
+                .attr('value', _start_pay_date.val())
+                .appendTo('#formExportToExcel');
+
+            $('<input />').attr('type', 'hidden')
+                .attr('name', 'end_pay_date')
+                .attr('value', _end_pay_date.val())
+                .appendTo('#formExportToExcel');
             
             $('<input />').attr('type', 'hidden')
                 .attr('name', 'via')
@@ -502,13 +515,13 @@
             });
 
             $.ajax({
-                url: "<?php echo site_url('backend/transaksi/validate_export_to_excel_pembayaran'); ?>",
+                url: "<?php echo site_url('backend/transaksi/validate_export_to_excel_laporan_pembayaran'); ?>",
                 type: 'POST',
                 data: newData,
                 dataType: 'json',
                 success: function(result) {
                     if(result.success){
-                        form.attr('action', "<?php echo site_url('backend/transaksi/export_to_excel_pembayaran'); ?>");
+                        form.attr('action', "<?php echo site_url('backend/transaksi/export_to_excel_laporan_pembayaran'); ?>");
                         
                         form.submit();
                     }else{

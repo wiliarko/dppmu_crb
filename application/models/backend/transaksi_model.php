@@ -59,8 +59,8 @@ class Transaksi_model extends CI_Model {
 			if(empty($api)){
 				$sql = "SELECT X.* FROM ((SELECT a.id, a.nofakt, a.collector, a.namakons, a.due_date, a.angsuran, a.angke, a.no_dpk, a.kode_bayar, a.bayar, a.keterangan, a.published, a.created_date, c.retail_outlet_name 
 					FROM `transaksi` a
-                    JOIN `master` b ON a.nofakt=b.NOFAKT
-                    LEFT JOIN `xendit_request` c ON a.id=c.transaksi_id
+                    left JOIN `master` b ON a.nofakt=b.NOFAKT
+                    LEFT JOIN `xendit_notify` c ON a.id=c.transaksi_id
 					WHERE $cLunas $isWhere
 					ORDER BY a.`due_date` ASC)
 
@@ -68,8 +68,8 @@ class Transaksi_model extends CI_Model {
 
 					(SELECT 'total' AS id, NULL AS nofakt, NULL AS collector, NULL AS namakons, '_' AS due_date, SUM(a.angsuran), NULL AS angke, NULL AS no_dpk, NULL AS kode_bayar, NULL AS bayar, NULL AS keterangan, NULL AS published, NULL AS created_date, c.retail_outlet_name
 					FROM `transaksi` a
-					JOIN `master` b ON a.nofakt=b.NOFAKT
-					LEFT JOIN `xendit_request` c ON a.id=c.transaksi_id
+					left JOIN `master` b ON a.nofakt=b.NOFAKT
+					LEFT JOIN `xendit_notify` c ON a.id=c.transaksi_id
 					WHERE $cLunas $isWhere LIMIT 1)) AS X WHERE X.angsuran <> 0";
 
 					if($orderlist==true){
@@ -390,7 +390,7 @@ class Transaksi_model extends CI_Model {
 				$isWhere .= ' AND xn.retail_outlet_name = "'. $params['outlet'] .'"';
 			}
 			if($params['start_pay_date'] != '' && $params['end_pay_date'] != ''){
-				$isWhere .= ' AND (date(xn.transaction_timestamp) >= "'.$params['start_pay_date'].'" AND date(xn.transaction_timestamp) <= "'.$params['end_pay_date'].'") AND t.kode_bayar IN ("99", "00") ';
+				$isWhere .= ' AND (date(xn.transaction_timestamp) >= cast("'.$params['start_pay_date'].'" as date) AND date(xn.transaction_timestamp) <= cast("'.$params['end_pay_date'].'" as date))';
 			}
 
 			if( !empty($params['request']['search']['value']) ) {   
@@ -420,7 +420,7 @@ class Transaksi_model extends CI_Model {
 					$ordename = ($params['columns'][$params['request']['order'][0]['column']]!=='id') ? $params['columns'][$params['request']['order'][0]['column']] : "xn.transaction_timestamp"; 
 					$sql.=  " ORDER BY ". $ordename ."   ".$params['request']['order'][0]['dir']."  LIMIT ".$params['request']['start']." ,".$params['request']['length']." ";
 				}else{
-					$sql.= " ORDER BY xn.transaction_timestamp ASC";
+					$sql.= " ORDER BY xn.transaction_timestamp desc";
 				}
 			}
 			
