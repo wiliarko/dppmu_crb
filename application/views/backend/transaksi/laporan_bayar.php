@@ -397,7 +397,7 @@
             responsive: false,
             dom: '<"html5buttons"B>lTfgitp',
             serverSide: true,
-            order: [[ 3, "desc" ]],
+            order: [[ 4, "desc" ]],
             ajax:{
                 url : "<?= base_url() ?>backend/transaksi/gettablelist_laporan_pembayaran",
                 type: "get",
@@ -451,7 +451,8 @@
                 ColsIdx: [
                     'number',
                     'nofakt', 
-                    'namakons',
+                    'nama',
+                    'paymentcode',
                     'transaction_timestamp',
                     'tenor',
                     'angsuran',
@@ -462,6 +463,7 @@
                     'NO',
                     'NOFAKT',
                     'NAMAKONS',
+                    'PAYMENT CODE',
                     'DATE',
                     'TENOR',
                     'ANGSURAN',

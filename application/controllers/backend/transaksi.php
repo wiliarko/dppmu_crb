@@ -908,6 +908,7 @@ class Transaksi extends CI_Controller {
 				array('No.','nosort', '3%'),
 				array('NOFAKT', '',''),
 				array('NAMAKONS', '','1'),
+				array('PAYMENT CODE', '','1'),
 				array('DATE', '',''),
 				array('TENOR', '',''),
 				array('ANGSURAN', '',''),
@@ -1003,12 +1004,13 @@ class Transaksi extends CI_Controller {
 		$columns = array( 
 			0 =>'id',
 			1 =>'nofakt', 
-			2 => 'namakons',
-			3 => 'transaction_timestamp',
-			4 => 'tenor',
-			5 => 'angsuran',
-			6 => 'angke',
-			7 => 'retail_outlet_name'
+			2 => 'name',
+			3 => 'payment_code',
+			4 => 'transaction_timestamp',
+			5 => 'tenor',
+			6 => 'angsuran',
+			7 => 'angke',
+			8 => 'retail_outlet_name'
 		);
 
 		$params = array(
@@ -1040,7 +1042,8 @@ class Transaksi extends CI_Controller {
 					$data[] = array(
 			  				'<center>'.$no.'<center>',
 			  				$row['nofakt'], 
-							$row['namakons'],
+							$row['name'],
+							$row['payment_code'],
 							$row['transaction_timestamp'],
 							$row['tenor'],
 							$row['angsuran'],

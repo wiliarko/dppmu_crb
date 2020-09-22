@@ -406,7 +406,8 @@ class Transaksi_model extends CI_Model {
 					select 
 						t.id,
 						t.nofakt, 
-						t.namakons,
+						xn.name,
+						xn.payment_code,
 						xn.transaction_timestamp,
 						t.tenor,
 						t.angsuran,
@@ -479,8 +480,9 @@ class Transaksi_model extends CI_Model {
 
 		if ($qry->num_rows() <= 0)
 		{
+			$nofaktur = $this->db->query("select * from xendit_request where payment_code='".$params['payment_code']."'")->row();
 			$this->db->select('id');
-			$this->db->where('id_nasabah', $id_nasabah);
+			$this->db->where('nofakt', $nofaktur->nofakt);
 			$this->db->where('no_dpk', NULL);
 			$this->db->order_by('angke', 'asc');
 			
