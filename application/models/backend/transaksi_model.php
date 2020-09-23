@@ -231,7 +231,9 @@ class Transaksi_model extends CI_Model {
 	}
 
 	function dpk_process_log($params) {
-	
+		if(strlen($params['id_trx'])==0){
+			unset($params['id_trx']);
+		}
 		$res = $this->db->insert('transaksi_log', $params);
 		return $res;
 	
@@ -361,11 +363,16 @@ class Transaksi_model extends CI_Model {
 					$ordename = ($params['columns'][$params['request']['order'][0]['column']]!=='id') ? $params['columns'][$params['request']['order'][0]['column']] : "nofakt"; 
 					$sql.=  " ORDER BY ". $ordename ."   ".$params['request']['order'][0]['dir']."  LIMIT ".$params['request']['start']." ,".$params['request']['length']." ";
 				}else{
-					$sql.= " ORDER BY nofakt ASC";
+					if(isset($params['page_start']) && isset($params['page_length'])){
+						$sql.= " ORDER BY nofakt ASC LIMIT ".$params['page_start']." ,".$params['page_length']." ";
+					}else{
+						$sql.= " ORDER BY nofakt ASC";
+					}
 				}
 			}
 			
 			$sql .= '';
+			// echo $sql;die;
 			$result = $this->db->query($sql);
 			return $result;
 
@@ -466,14 +473,28 @@ class Transaksi_model extends CI_Model {
 	function receive_xendit_notify($params)
 	{
 		$payment_code = $params['payment_code'];
-		$fixed_payment_code_id = $params['fixed_payment_code_id'];
-		$id_nasabah = str_replace($params['prefix'], '', $params['payment_code']);
-		$tmp_transaction_timestamp = explode('.', $params['transaction_timestamp']);
-		$transaction_timestamp = str_replace('T', ' ', $tmp_transaction_timestamp[0]);
+		if(isset($params['fixed_payment_code_id'])){
+			$fixed_payment_code_id = $params['fixed_payment_code_id'];
+		}
+		if(isset($params['prefix'])){
+			$id_nasabah = str_replace($params['prefix'], '', $params['payment_code']);
+		}
+		
+		if(isset($params['transaction_timestamp'])){
+			$tmp_transaction_timestamp = explode('.', $params['transaction_timestamp']);
+			$transaction_timestamp = str_replace('T', ' ', $tmp_transaction_timestamp[0]);
+		}
 
 		$this->db->where('payment_code', $params['payment_code']);
-		$this->db->where('fixed_payment_code_payment_id', $params['fixed_payment_code_payment_id']);
-		$this->db->where('fixed_payment_code_id', $params['fixed_payment_code_id']);
+		
+		if(isset($params['fixed_payment_code_payment_id'])){
+			$this->db->where('fixed_payment_code_payment_id', $params['fixed_payment_code_payment_id']);
+		}
+		
+		if(isset($params['fixed_payment_code_id'])){
+			$this->db->where('fixed_payment_code_id', $params['fixed_payment_code_id']);
+		}
+		
 		$this->db->where('retail_outlet_name', $params['retail_outlet_name']);
 
 		$qry = $this->db->get('xendit_notify');
@@ -500,7 +521,9 @@ class Transaksi_model extends CI_Model {
 			$this->db->set('name', $params['name']);
 			$this->db->set('amount', $params['amount']);
 			$this->db->set('status', $params['status']);
-			$this->db->set('transaction_timestamp', $transaction_timestamp);
+			if(strlen($transaction_timestamp)>0){
+				$this->db->set('transaction_timestamp', $transaction_timestamp);
+			}
 			$this->db->set('payment_id', $params['payment_id']);
 			$this->db->set('fixed_payment_code_payment_id', $params['fixed_payment_code_payment_id']);
 			$this->db->set('fixed_payment_code_id', $params['fixed_payment_code_id']);

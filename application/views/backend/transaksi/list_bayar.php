@@ -394,8 +394,9 @@
         var _end_pay_date = $("#_end_pay_date");
         var _status_bayar = $("#_status_bayar");
         var _outlet = $("#_outlet");
-        $('#_gettablelist').DataTable({
+        var datatable = $('#_gettablelist').DataTable({
             pageLength: 25,
+            lengthMenu: [[10, 25, 100, 500], [10, 25, 100,500]],
             responsive: false,
             dom: '<"html5buttons"B>lTfgitp',
             serverSide: true,
@@ -420,6 +421,8 @@
               },
             buttons: [ ]
         });
+        // var info = datatable.page.info();
+        // console.log(info);
 
         $('#addPaymentOutlet').click(function(e) {
             e.preventDefault();
@@ -440,6 +443,10 @@
 
         $('#exportToExcel').click(function(e) {
             e.preventDefault();
+
+            var tabelinfo =  datatable.page.info();
+            // console.log(tabelinfo);
+            // alert(s);
 
             var cols = JSON.stringify({
                 ColsIdx: [
@@ -486,6 +493,16 @@
                 .attr('name', 'via')
                 .attr('value', _via.val())
                 .appendTo('#formExportToExcel');
+
+            $('<input />').attr('type', 'hidden')
+                .attr('name', 'page_length')
+                .attr('value', tabelinfo.length)
+                .appendTo('#formExportToExcel');
+            $('<input />').attr('type', 'hidden')
+                .attr('name', 'page_start')
+                .attr('value', tabelinfo.start)
+                .appendTo('#formExportToExcel');
+                
 
             var form = $('#formExportToExcel');
 

@@ -1147,7 +1147,9 @@ class Transaksi extends CI_Controller {
     	$result = $xendit->create_payment_code();
     	// var_dump($result);die;
 
-    	if (isset($result['error_code']) && !empty($result['error_code'])) echo json_encode(array('success' => FALSE, 'msg' => $result['message']));
+    	if(is_null($result)){
+			echo json_encode(array('success' => FALSE, 'msg' => "null"));
+    	}else if (isset($result['error_code']) && !empty($result['error_code'])) echo json_encode(array('success' => FALSE, 'msg' => $result['message']));
     	else
     	{
 	    	$result['transaksi_id'] = $post['transaksi_id'];
