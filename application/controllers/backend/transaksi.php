@@ -1149,7 +1149,27 @@ class Transaksi extends CI_Controller {
 
     	if(is_null($result)){
 			echo json_encode(array('success' => FALSE, 'msg' => "null"));
-    	}else if (isset($result['error_code']) && !empty($result['error_code'])) echo json_encode(array('success' => FALSE, 'msg' => $result['message']));
+    	}else if (isset($result['error_code']) && !empty($result['error_code'])){
+    		$result['transaksi_id'] = null;
+	    	$result['external_id'] = null;
+	    	$result['nofakt'] = $post['nofaktPembayaran'];
+	    	$result['tenorPembayaran'] = $post['tenorPembayaran'];
+	    	$result['kdcust'] = $post['kdcust'];
+	    	$result['is_single_use'] = null;
+	    	$result['status'] = null;
+	    	$result['owner_id'] = null;
+	    	$result['retail_outlet_name'] = $post['channel'];
+	    	$result['prefix'] = "1122";
+	    	$result['name'] = $post['nasabah'];
+	    	$result['type'] = null;
+	    	$result['id'] = null;
+	    	$result['expected_amount'] = $post['angkePembayaran'];
+	    	$result['payment_code'] = "1122".$post['id_nasabah'];
+	    	$result['expiration_date'] = date("Y-m-d H:i:s");;
+
+	    	$this->insert_request_xendit_trx($result);	
+			echo json_encode(array('success' => FALSE, 'msg' => $result['message']));
+    	}
     	else
     	{
 	    	$result['transaksi_id'] = $post['transaksi_id'];
